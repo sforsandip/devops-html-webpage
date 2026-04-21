@@ -7,6 +7,14 @@ pipeline {
         PORT = "8085"
     }
 
+stages {
+
+        stage('Clone Code') {
+            steps {
+		git credentialsId: '2e625d22-14df-48c6-a47a-27b27bb4ff4b', url: 'git@github.com:sforsandip/devops-html-webpage.git'
+            }
+        }
+
     stages {
 
         stage('Build Docker Image') {
