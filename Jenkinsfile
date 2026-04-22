@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "devops-app"
-        CONTAINER_NAME = "devops-container"
-        PORT = "8085"
         APP_PATH = "/opt/devops-project/app"
     }
 
@@ -17,25 +15,27 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image in Minikube') {
             steps {
-                sh 'docker build -t ${IMAGE_NAME} ${APP_PATH}'
+                sh '''
+                eval $(minikube docker-env)
+                docker build -t devops-app ${APP_PATH}
+                '''
             }
         }
 
-        stage('Clean Old Container') {
-    steps {
-        sh '''
-        docker rm -f ${CONTAINER_NAME} || true
-        '''
-    }
-}
-
-        stage('Run Container') {
+        stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}
+                kubectl apply -f /opt/devops-project/k8s/
                 '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'kubectl get pods'
+                sh 'kubectl get svc'
             }
         }
     }
