@@ -2,23 +2,15 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "devops-app"
         APP_PATH = "/opt/devops-project/app"
     }
 
     stages {
 
-        stage('Verify Path') {
-            steps {
-                sh 'ls -la /opt/devops-project'
-                sh 'ls -la ${APP_PATH}'
-            }
-        }
-
         stage('Build Image in Minikube') {
             steps {
                 sh '''
-                eval $(minikube docker-env)
+                eval $(minikube -p minikube docker-env)
                 docker build -t devops-app ${APP_PATH}
                 '''
             }
@@ -32,10 +24,9 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify') {
             steps {
                 sh 'kubectl get pods'
-                sh 'kubectl get svc'
             }
         }
     }
