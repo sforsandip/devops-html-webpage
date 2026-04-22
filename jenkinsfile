@@ -5,42 +5,36 @@ pipeline {
         IMAGE_NAME = "devops-app"
         CONTAINER_NAME = "devops-container"
         PORT = "8085"
+        APP_PATH = "/opt/devops-project/app"
     }
 
- stages {
+    stages {
 
-        stage('Checkout Code') {
+        stage('Verify Path') {
             steps {
-                git credentialsId: 'github-ssh-key', url: 'git@github.com:sforsandip/devops-html-webpage.git'
+                sh 'ls -la /opt/devops-project'
+                sh 'ls -la ${APP_PATH}'
             }
         }
 
-        stage('Verify Files') {
+        stage('Build Docker Image') {
             steps {
-                sh 'pwd'
-                sh 'ls -la'
-            }
-        }
-
-        stage{
-		stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t devops-app app'
+                sh 'docker build -t ${IMAGE_NAME} ${APP_PATH}'
             }
         }
 
         stage('Clean Old Container') {
-            steps {
-                sh '''
-                docker ps -q --filter "publish=8085" | xargs -r docker rm -f
-                '''
-            }
-        }
+    steps {
+        sh '''
+        docker rm -f ${CONTAINER_NAME} || true
+        '''
+    }
+}
 
         stage('Run Container') {
             steps {
                 sh '''
-                docker run -d -p 8085:80 --name devops-container devops-app
+                docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}
                 '''
             }
         }
