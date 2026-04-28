@@ -1,8 +1,9 @@
-- name: Build Docker image
-  shell: docker build -t devops-app /opt/devops-project/app
+- name: Deploy application to Kubernetes
+  shell: kubectl apply -f /opt/devops-project/k8s/
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
 
-- name: Remove old container
-  shell: docker rm -f devops-container || true
-
-- name: Run container
-  shell: docker run -d -p 8085:80 --name devops-container devops-app
+- name: Restart deployment
+  shell: kubectl rollout restart deployment devops-app
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
