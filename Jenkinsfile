@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                  git branch: 'main',
-                git 'git@github.com:sforsandip/devops-html-webpage.git'
+               url: 'git 'git@github.com:sforsandip/devops-html-webpage.git'
             }
         }
 
