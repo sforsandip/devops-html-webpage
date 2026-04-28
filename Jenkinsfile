@@ -5,6 +5,15 @@ pipeline {
         APP_PATH = "/opt/devops-project/app"
     }
 
+stage('Setup Server with Ansible') {
+    steps {
+        sh '''
+        cd /home/ubuntu/ansible-project
+        ansible-playbook -i inventory.ini setup-devops.yml
+        '''
+    }
+}
+
     stages {
 
         stage('Build Image in Minikube') {

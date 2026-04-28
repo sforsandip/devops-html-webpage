@@ -1,0 +1,7 @@
+- name: Run DevOps Roles
+  hosts: local
+  become: yes
+
+  roles:
+    - docker
+    - app
