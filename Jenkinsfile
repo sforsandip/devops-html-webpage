@@ -2,41 +2,69 @@ pipeline {
     agent any
 
     environment {
-        APP_PATH = "/opt/devops-project/app"
+        IMAGE_NAME = "devops-html-app"
+        IMAGE_TAG = "1.0"
+        NEXUS_URL = "54.234.10.136:8082"
+        NEXUS_REPO = "devops-html-app"
     }
 
+    stages {
 
-        stage('Build Image in Minikube') {
+        stage('Checkout Code') {
             steps {
-                sh '''
-                eval $(minikube -p minikube docker-env)
-                docker build -t devops-app ${APP_PATH}
-                '''
+                git 'git@github.com:sforsandip/devops-html-webpage.git'
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                kubectl apply -f /opt/devops-project/k8s/
-                '''
+                sh """
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
             }
         }
 
-        stage('Verify') {
+        stage('Login to Nexus') {
             steps {
-                sh 'kubectl get pods'
+                withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                        echo $PASS | docker login ${NEXUS_URL} -u $USER --password-stdin
+                    """
+                }
             }
         }
-stage('Setup Server with Ansible') {
-    steps {
-        sh '''
-        cd /home/ubuntu/ansible-project
-        ansible-playbook -i inventory.ini setup-devops.yml
-        '''
-            }
-         }
-        }
-       }
-    
 
+        stage('Tag Image') {
+            steps {
+                sh """
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${NEXUS_URL}/${NEXUS_REPO}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Push Image to Nexus') {
+            steps {
+                sh """
+                    docker push ${NEXUS_URL}/${NEXUS_REPO}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Run Container (Local Test)') {
+            steps {
+                sh """
+                    docker run -d -p 8080:80 --name html-app ${IMAGE_NAME}:${IMAGE_TAG} || true
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline executed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs."
+        }
+    }
+}
