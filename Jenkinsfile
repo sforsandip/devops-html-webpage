@@ -11,6 +11,7 @@ pipeline {
     stages {
 
         stage('Checkout Code') {
+             git branch: 'main',
             steps {
                 git 'git@github.com:sforsandip/devops-html-webpage.git'
             }
