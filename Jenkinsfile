@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "devops-html-app"
         IMAGE_TAG = "1.0"
-        NEXUS_URL = "54.234.10.136:8082"
+        NEXUS_URL = "172.31.21.36:8082"
         NEXUS_REPO = "devops-html-app"
     }
 
@@ -19,11 +19,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
-            }
+                dir('app') {
+            sh 'docker build -t devops-html-app:1.0 .'
         }
+    }
+}
 
         stage('Login to Nexus') {
             steps {
