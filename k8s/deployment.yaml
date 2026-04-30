@@ -16,7 +16,7 @@ spec:
         - name: nexus-secret   # 🔐 pulls from Nexus
       containers:
         - name: devops-container
-          image: 54.234.10.136:8082/devops-app:latest   # 🎯 Nexus image
+          image: 172.31.21.36:8082/devops-app:latest   # 🎯 Nexus image
           imagePullPolicy: Always
           ports:
             - containerPort: 80

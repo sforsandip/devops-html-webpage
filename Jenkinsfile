@@ -29,7 +29,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
-                        echo $PASS | docker login ${NEXUS_URL} -u $USER --password-stdin
+                        echo $PASS | docker login ${NEXUS_URL} -u $USER --password-admin1234
                     """
                 }
             }
